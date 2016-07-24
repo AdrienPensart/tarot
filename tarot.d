@@ -1,99 +1,32 @@
 module tarot;
 
+import combinations: combinations;
+import std.algorithm;
 import std.random;
 import std.conv;
 import std.stdio;
-//import combinations;
-import std.traits: Unqual;
 
-struct Combinations(T, bool copy=true) {
-    Unqual!T[] pool, front;
-    size_t r, n;
-    bool empty = false;
-    size_t[] indices;
-    size_t len;
-    bool lenComputed = false;
- 
-    this(T[] pool_, in size_t r_) pure nothrow @safe {
-        this.pool = pool_.dup;
-        this.r = r_;
-        this.n = pool.length;
-        if (r > n)
-            empty = true;
-        indices.length = r;
-        foreach (immutable i, ref ini; indices)
-            ini = i;
-        front.length = r;
-        foreach (immutable i, immutable idx; indices)
-            front[i] = pool[idx];
-    }
- 
-    @property size_t length() /*logic_const*/ pure nothrow @nogc {
-        static size_t binomial(size_t n, size_t k) pure nothrow @safe @nogc
-        in {
-            assert(n > 0, "binomial: n must be > 0.");
-        } body {
-            if (k < 0 || k > n)
-                return 0;
-            if (k > (n / 2))
-                k = n - k;
-            size_t result = 1;
-            foreach (size_t d; 1 .. k + 1) {
-                result *= n;
-                n--;
-                result /= d;
-            }
-            return result;
-        }
- 
-        if (!lenComputed) {
-            // Set cache.
-            len = binomial(n, r);
-            lenComputed = true;
-        }
-        return len;
-    }
- 
-    void popFront() pure nothrow @safe {
-        if (!empty) {
-            bool broken = false;
-            size_t pos = 0;
-            foreach_reverse (immutable i; 0 .. r) {
-                pos = i;
-                if (indices[i] != i + n - r) {
-                    broken = true;
-                    break;
-                }
-            }
-            if (!broken) {
-                empty = true;
-                return;
-            }
-            indices[pos]++;
-            foreach (immutable j; pos + 1 .. r)
-                indices[j] = indices[j - 1] + 1;
-            static if (copy)
-                front = new Unqual!T[front.length];
-            foreach (immutable i, immutable idx; indices)
-                front[i] = pool[idx];
-        }
-    }
+auto Petit = Carte(Couleur.Atout, 1);
+auto Excuse = Carte(Couleur.Atout, 0);
+
+string declare(ubyte v){
+	return "auto _" ~ to!string(v) ~ " = Carte(Couleur.Atout, " ~ to!string(v) ~ ");";
 }
- 
-Combinations!(T, copy) combinations(bool copy=true, T)
-                                   (T[] items, in size_t k)
-in {
-    assert(items.length, "combinations: items can't be empty.");
-} body {
-    return typeof(return)(items, k);
+
+string declareAll(){
+	string all;
+	foreach(ubyte i; 1..22){
+		all ~= declare(i);
+	}
+	return all;
 }
+
+mixin(declareAll());
 
 enum Couleur { Pique, Carreau, Coeur, Trefle, Atout }
 
 struct Carte
 {
-    //@disable this();
-
     this(Couleur c, ubyte v){
         this.c = c;
         this.v = v;
@@ -101,26 +34,46 @@ struct Carte
 
     Couleur c;
     ubyte v;
-    bool first;
 
-    public bool master(Carte arg){
-        if(c == arg.c){
-            return v > arg.v;
-        }
-        return c == Couleur.Atout;
-    }
+    public pure @safe nothrow{
+		bool master(Carte arg){
+	        if(c == arg.c){
+    	        return v > arg.v;
+        	}
+	        return c == Couleur.Atout;
+    	}
 
-    public bool discardable(bool force=false){
-        if(c == Couleur.Atout && v > 1 && v < 21){
-            if(force){
-                return true;
-            }
-        }
-        else if(v != 14){
-            return true;
-        }
-        return false;
-    }
+	    bool discardable(bool force=false){
+    	    if(c == Couleur.Atout && v > 1 && v < 21){
+        	    if(force){
+            	    return true;
+	            }
+    	    }
+        	else if(v != 14){
+            	return true;
+	        }
+    	    return false;
+	    }
+
+		float points(){
+			if (c == Couleur.Atout && (v == 0 || v == 1 || v == 21)){
+				return 4.5;
+			}
+			if (v == 14){
+				return 4.5;
+			}
+			if (v == 13){
+				return 3.5;
+			}
+			if (v == 12){
+				return 2.5;
+			}
+			if (v == 11){
+				return 1.5;
+			}
+			return 0.5;
+		}
+	}
 }
 
 alias Carte[] Deck;
@@ -149,8 +102,8 @@ void main() {
     }
 
     Deck stack;
-    foreach(v; 0..22){
-        stack ~= Carte(Couleur.Atout, cast(ubyte)v);
+    foreach(ubyte v; 0..22){
+        stack ~= Carte(Couleur.Atout, v);
     }
     foreach(c; [Couleur.Pique, Couleur.Carreau, Couleur.Coeur, Couleur.Trefle]){
         foreach(v; 1..15){
@@ -203,26 +156,16 @@ void main() {
         }
 
         writeln("Discard :");
-        show(discards);
+        discards.show();
         writeln("Jeu du preneur : ");
-        show(cards);
+        cards.show();
         break;
     }
-
-    //show(dog);
-    //if(v == 0)
-    //    return false;
-    //else if(arg.v == 0)
-    //    return true;
-
 }
 
 unittest {
-    auto Petit = Carte(Couleur.Atout, 1);
-    auto Excuse = Carte(Couleur.Atout, 0);
-
     Deck misere = [Carte(Couleur.Carreau, 1), Carte(Couleur.Pique, 14), Carte(Couleur.Coeur, 10)];
-    Deck atouts = [Carte(Couleur.Atout, 1), Carte(Couleur.Atout, 2)];
+    Deck atouts = [_1, _2];
     Deck petit = [Petit];
     Deck excuse = [Excuse];
 
@@ -235,10 +178,8 @@ unittest {
     assert(petitSec(misere ~ atouts ~ petit ~ excuse) == false);
     assert(petitSec(misere ~ atouts ~ excuse) == false);
 
-    //misere.combinations(2).map!(x => x).writeln;
-	import std.stdio, std.array, std.algorithm;
-	misere.combinations!false(2).map!(x => x).writeln;
-	misere.combinations!true(2).map!(x => x).writeln;
-	misere.combinations(2).map!(x => x).writeln;
+	assert(equal(misere.combinations!false(2), misere.combinations(2)));
+	assert(equal(misere.combinations!true(2), misere.combinations(2)));
+	assert(equal(misere.combinations!false(2), misere.combinations!true(2)));
 }
 
