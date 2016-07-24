@@ -2,6 +2,7 @@ module combinations;
 
 import std.stdio, std.array, std.algorithm;
 import std.traits: Unqual;
+import core.exception : RangeError;
 
 struct Combinations(T, bool copy=true) {
     Unqual!T[] pool, front;
@@ -15,14 +16,17 @@ struct Combinations(T, bool copy=true) {
         this.pool = pool_.dup;
         this.r = r_;
         this.n = pool.length;
-        if (r > n)
+        if (r > n){
             empty = true;
+        }
         indices.length = r;
-        foreach (immutable i, ref ini; indices)
+        foreach (immutable i, ref ini; indices){
             ini = i;
+        }
         front.length = r;
-        foreach (immutable i, immutable idx; indices)
+        foreach (immutable i, immutable idx; indices){
             front[i] = pool[idx];
+        }
     }
 
     @property size_t length() /*logic_const*/ pure nothrow @nogc {
@@ -30,10 +34,12 @@ struct Combinations(T, bool copy=true) {
         in {
             assert(n > 0, "binomial: n must be > 0.");
         } body {
-            if (k < 0 || k > n)
+            if (k < 0 || k > n){
                 return 0;
-            if (k > (n / 2))
+            }
+            if (k > (n / 2)){
                 k = n - k;
+            }
             size_t result = 1;
             foreach (size_t d; 1 .. k + 1) {
                 result *= n;

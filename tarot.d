@@ -24,6 +24,10 @@ string declareAll(){
 mixin(declareAll());
 
 enum Couleur { Pique, Carreau, Coeur, Trefle, Atout }
+wstring[Couleur] mapping;
+static this(){
+    mapping =  [Couleur.Pique:r"♠", Couleur.Carreau:r"♦", Couleur.Trefle:r"♣", Couleur.Coeur:r"♥"];
+}
 
 struct Carte
 {
@@ -34,6 +38,17 @@ struct Carte
 
     Couleur c;
     ubyte v;
+
+    wstring toString(){
+        if(c == Couleur.Atout){
+            if(v == 0){
+                return r"🃏";
+            }
+            return to!wstring(v) ~ r"🂠";
+        } else {
+            return to!wstring(v) ~ mapping[c];
+        }
+    }
 
     invariant{
         assert(c == Couleur.Pique || c == Couleur.Carreau || c == Couleur.Coeur || c == Couleur.Trefle || c == Couleur.Atout);
@@ -92,7 +107,7 @@ alias Carte[] Deck;
 
 auto show(Deck deck){
     foreach(d; deck){
-        write("[",d.v,",",d.c,"]");
+        write("[",d,"]");
     }
     return deck;
 }
@@ -109,7 +124,7 @@ bool petitSec(Deck deck){
     return petitFound && (numberAtouts == 1);
 }
 
-void main() {
+void main(string[] args) {
     version(unittest){
         return;
     }
@@ -119,8 +134,8 @@ void main() {
         stack ~= Carte(Couleur.Atout, v);
     }
     foreach(c; [Couleur.Pique, Couleur.Carreau, Couleur.Coeur, Couleur.Trefle]){
-        foreach(v; 1..15){
-            stack ~= Carte(c, cast(ubyte)v);
+        foreach(ubyte v; 1..15){
+            stack ~= Carte(c, v);
         }
     }
     writeln("Stack size :", stack.length);
@@ -131,7 +146,7 @@ void main() {
     decks[0] = stack[6..24];
     decks[1] = stack[24..42];
     decks[2] = stack[42..60];
-    decks[3] = stack[60..77];
+    decks[3] = stack[60..78];
 
     foreach(deck; decks){
         if(deck.petitSec){
@@ -141,7 +156,7 @@ void main() {
     }
 
     foreach(deck; decks){
-        Deck taker = decks[0] ~ dog;
+        Deck taker = deck ~ dog;
         writeln("Size taker :", taker.length);
         Deck cards;
         Deck discards;
@@ -169,14 +184,20 @@ void main() {
         writeln("Discards:", discards);
         writeln("Cards:", cards);
         if(cards.length < 18){
-            writeln("Computing combinations: ", 24 - discards.length);
-            discards.combinations!false(24 - discards.length).map!(x => x).writeln;
+            //writeln("Computing combinations: ", 24 - discards.length);
+            writeln("Nb comb: ", discards.combinations!false(24 - discards.length).map!(x => x).length);
         }
-        break;
     }
 }
 
 unittest {
+    Deck discardable;
+    foreach(c; [Couleur.Pique, Couleur.Carreau, Couleur.Coeur, Couleur.Trefle]){
+        foreach(ubyte v; 1..14){
+            discardable ~= Carte(c, v);
+        }
+    }
+
     Deck misere = [Carte(Couleur.Carreau, 1), Carte(Couleur.Pique, 14), Carte(Couleur.Coeur, 10)];
     Deck atouts = [_1, _2];
     Deck petit = [Petit];
@@ -198,5 +219,9 @@ unittest {
     assert(equal(misere.combinations!false(2), misere.combinations(2)));
     assert(equal(misere.combinations!true(2), misere.combinations(2)));
     assert(equal(misere.combinations!false(2), misere.combinations!true(2)));
+    
+    // 7 cartes pas écartables du tout
+    // 26 cartes pas écartables
+    // 52 cartes écartables
+    assert(discardable[0..24].combinations(6).map!(x => x).length == 134596);
 }
-
