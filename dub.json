@@ -1,0 +1,12 @@
+{
+	"name": "tarot",
+	"authors": [
+		"crunch"
+	],
+	"dependencies": {
+		"docopt": ">=0.6.1-b.6 <0.7.0"
+	},
+	"description": "Tarot simulation",
+	"copyright": "Copyright © 2017, crunch",
+	"license": "proprietary"
+}

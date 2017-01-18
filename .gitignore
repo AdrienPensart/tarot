@@ -1,2 +1,6 @@
+.dub
+docs.json
+__dummy.html
 *.o
-tarot
+*.obj
+__test__*__

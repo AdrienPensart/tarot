@@ -219,9 +219,9 @@ unittest {
     assert(equal(misere.combinations!false(2), misere.combinations(2)));
     assert(equal(misere.combinations!true(2), misere.combinations(2)));
     assert(equal(misere.combinations!false(2), misere.combinations!true(2)));
-    
-    // 7 cartes pas écartables du tout
-    // 26 cartes pas écartables
-    // 52 cartes écartables
+
+    // 7 cars not discardable at all
+    // 26 not discardable
+    // 52 discardable
     assert(discardable[0..24].combinations(6).map!(x => x).length == 134596);
 }
