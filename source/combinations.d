@@ -94,3 +94,10 @@ in {
     return typeof(return)(items, k);
 }
 
+unittest {
+    auto alphabet = "abcdefghijklmnopqrstuvwxyz";
+    assert(alphabet.combinations(6).length == 230230);
+
+    auto test = "abc";
+    assert(equal(test.combinations(2).map!(x => x), ["ab", "ac", "bc"]));
+}
