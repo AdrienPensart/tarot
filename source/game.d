@@ -21,10 +21,6 @@ unittest {
     Deck petit = [Petit];
     Deck excuse = [Excuse];
 
-    assert(Excuse.discardable == false);
-    assert(Petit.discardable == false);
-    assert(_21.discardable == false);
-
     assert(misere.petitSec == false);
     assert(petitSec(misere ~ excuse) == false);
     assert(petitSec(misere ~ petit) == true);
@@ -42,26 +38,4 @@ unittest {
     // 26 not discardable
     // 52 discardable
     assert(discardable[0..24].combinations(6).map!(x => x).length == 134596);
-
-    auto stack = newStack();
-    assert(stack.length == 78);
-    assert(stack.points == 91);
-
-    foreach(s; stack)
-    {
-        if(s.points == 4.5)
-        {
-            assert(s.discardable() == false);
-            assert(s.discardable(true) == false);
-        }
-        else if(s.c == Color.Atout)
-        {
-            assert(s.discardable() == false);
-            assert(s.discardable(true) == true);
-        }
-        else
-        {
-            assert(s.discardable() == true);
-        }
-    }
 }

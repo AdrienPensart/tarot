@@ -7,10 +7,9 @@ import std.stdio;
 import std.conv;
 import docopt;
 import argvalue;
-import game: Deck, Card, Couleur, petitSec, newStack, show;
+import game: Deck, Card, Color, petitSec, newStack, show;
 
-Deck give(ref Deck stack, size_t n)
-{
+Deck give(ref Deck stack, size_t n){
     auto s = stack[0..n];
     stack = stack[n..$];
     return s;
@@ -42,38 +41,36 @@ void main(string[] args) {
 
     enum MIN_PLAYER = 3;
     enum MAX_PLAYER = 5;
-    if(players < MIN_PLAYER || players > MAX_PLAYER)
-    {
+    if(players < MIN_PLAYER || players > MAX_PLAYER){
             writeln("Bad number of players : ",players);
             return;
     }
 
+    // 78 - 3 = 75, 75 - 45 = 30
     auto decks = new Deck[players];
     enum MIN_CARD = 15;
     enum CARD_PER_TURN = 3;
     Deck dog = stack.give(CARD_PER_TURN);
-    foreach(p; 0..players)
-    {
+    foreach(p; 0..players){
         decks[p] ~= stack.give(MIN_CARD);
     }
-    while(((cast(int)stack.length - CARD_PER_TURN) / players) > CARD_PER_TURN)
-    {
-        foreach(p; 0..players)
-        {
+    while(((cast(int)stack.length - CARD_PER_TURN) / players) > CARD_PER_TURN - 1){
+        foreach(p; 0..players){
             decks[p] ~= stack.give(CARD_PER_TURN);
         }
     }
     dog ~= stack.give(stack.length);
 
-    foreach(deck; decks){
+    foreach(i, deck; decks){
         if(deck.petitSec){
-            writeln("PetitSec, cannot continue");
             return;
         }
     }
 
-    foreach(deck; decks){
-        Deck taker = deck ~ dog;
+    /*foreach(deck; decks)*/
+    auto deck = decks[0].idup;
+    {
+        auto taker = deck ~ dog.idup;
         writeln("Size taker : ", taker.length);
         Deck cards;
         Deck discards;
@@ -97,12 +94,12 @@ void main(string[] args) {
                 }
             }
         }
+        auto complement = discards.combinations!false(deck.length - cards.length);
+        complement.each!(c => writeln(cards ~ c));
 
-        writeln("Discards:", discards);
-        writeln("Cards:", cards);
-        if(cards.length < 18){
-            //writeln("Computing combinations: ", 24 - discards.length);
-            writeln("Nb comb: ", discards.combinations!false(24 - discards.length).map!(x => x).length);
-        }
+        writeln("Discards: ", discards.length, " : ", discards);
+        writeln("Cards: ", cards.length, " : ", cards);
+        writeln("Deck: ", deck.length, " : ", deck);
+        writeln("Combinations: ", complement.length);
     }
 }

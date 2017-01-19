@@ -5,15 +5,14 @@ import card;
 
 alias Card[] Deck;
 
-auto show(Deck deck){
+auto show(const Deck deck){
     foreach(d; deck){
         write("[",d,"]");
     }
     return deck;
 }
 
-auto points(Deck deck)
-{
+auto points(Deck deck){
     float p = 0.0;
     foreach(d; deck)
     {
@@ -22,8 +21,7 @@ auto points(Deck deck)
     return p;
 }
 
-auto newStack()
-{
+auto newStack(){
     Deck stack;
     foreach(ubyte v; 0..22){
         stack ~= Card(Color.Atout, v);
@@ -46,4 +44,24 @@ bool petitSec(Deck deck){
         }
     }
     return petitFound && (numberAtouts == 1);
+}
+
+unittest{
+    auto stack = newStack();
+    assert(stack.length == 78);
+    assert(stack.points == 91);
+
+    foreach(s; stack){
+        if(s.points == 4.5){
+            assert(s.discardable() == false);
+            assert(s.discardable(true) == false);
+        }
+        else if(s.c == Color.Atout){
+            assert(s.discardable() == false);
+            assert(s.discardable(true) == true);
+        }
+        else{
+            assert(s.discardable() == true);
+        }
+    }
 }

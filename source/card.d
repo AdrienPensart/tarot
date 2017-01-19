@@ -20,7 +20,14 @@ string declareAll(){
 
 mixin(declareAll());
 
-enum Color { Pique, Carreau, Coeur, Trefle, Atout }
+enum Color{
+    Pique,
+    Carreau,
+    Coeur,
+    Trefle,
+    Atout
+}
+
 wstring[Color] mapping;
 static this(){
     mapping =  [Color.Pique:r"♠", Color.Carreau:r"♦", Color.Trefle:r"♣", Color.Coeur:r"♥"];
@@ -36,7 +43,7 @@ struct Card
     Color c;
     ubyte v;
 
-    wstring toString(){
+    wstring toString() const {
         if(c == Color.Atout){
             if(v == 0){
                 return r"🃏";
@@ -56,7 +63,7 @@ struct Card
         }
     }
 
-    public pure @safe nothrow{
+    public const pure @safe nothrow{
         bool master(Card arg){
             if(c == arg.c){
                 return v > arg.v;
@@ -80,8 +87,7 @@ struct Card
         }
 
         float points(){
-            if (c == Color.Atout)
-            {
+            if (c == Color.Atout){
                 if(v == 0 || v == 1 || v == 21){
                     return 4.5;
                 }
@@ -102,4 +108,10 @@ struct Card
             return 0.5;
         }
     }
+}
+
+unittest{
+    assert(Excuse.discardable == false);
+    assert(Petit.discardable == false);
+    assert(_21.discardable == false);
 }

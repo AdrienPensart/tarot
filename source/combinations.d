@@ -4,7 +4,7 @@ import std.stdio, std.array, std.algorithm;
 import std.traits: Unqual;
 import core.exception : RangeError;
 
-struct Combinations(T, bool copy=true) {
+struct Combinations(T, bool copy=true){
     Unqual!T[] pool, front;
     size_t r, n;
     bool empty = false;
@@ -12,7 +12,7 @@ struct Combinations(T, bool copy=true) {
     size_t len;
     bool lenComputed = false;
 
-    this(T[] pool_, in size_t r_) pure nothrow @safe {
+    this(T[] pool_, in size_t r_) pure nothrow @safe{
         this.pool = pool_.dup;
         this.r = r_;
         this.n = pool.length;
@@ -41,7 +41,7 @@ struct Combinations(T, bool copy=true) {
                 k = n - k;
             }
             size_t result = 1;
-            foreach (size_t d; 1 .. k + 1) {
+            foreach (size_t d; 1 .. k + 1){
                 result *= n;
                 n--;
                 result /= d;
@@ -49,7 +49,7 @@ struct Combinations(T, bool copy=true) {
             return result;
         }
 
-        if (!lenComputed) {
+        if (!lenComputed){
             // Set cache.
             len = binomial(n, r);
             lenComputed = true;
