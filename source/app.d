@@ -2,18 +2,16 @@ module tarot;
 
 import combinations: combinations;
 import std.algorithm;
+import std.array;
+import std.range;
 import std.random;
 import std.stdio;
 import std.conv;
 import docopt;
 import argvalue;
-import game: Deck, Card, Color, petitSec, newStack, show;
-
-Deck give(ref Deck stack, size_t n){
-    auto s = stack[0..n];
-    stack = stack[n..$];
-    return s;
-}
+import deck;
+import game;
+import player;
 
 void main(string[] args) {
     version(unittest){
@@ -60,30 +58,32 @@ void main(string[] args) {
         }
     }
     dog ~= stack.give(stack.length);
-
     foreach(i, deck; decks){
         if(deck.petitSec){
+            writeln("Can't continue with petit sec in deck");
             return;
         }
     }
-
-    /*foreach(deck; decks)*/
-    auto deck = decks[0].idup;
-    {
-        auto taker = deck ~ dog.idup;
-        writeln("Size taker : ", taker.length);
+    /* For each :
+        - random generation (1 for the moment)
+        - playing mode (3, 4, 5) (1 for the moment)
+        - deck (3 possibilities)
+        - discard combination
+        - order of playing (decks index permutations)
+        - combinations of deck play following game rules
+    */
+    foreach(deck; decks){
         Deck cards;
         Deck discards;
-        foreach(card; taker){
+        foreach(card; deck ~ dog){
             if(card.discardable()){
                 discards ~= card;
             } else {
                 cards ~= card;
             }
         }
-
         if(cards.length > deck.length){
-            writeln("Exceptional situation, we need to choose between outsiders to create discard stack");
+            writeln("Exceptional situation, we need to choose between outsiders to complete discard.");
             while(cards.length > deck.length){
                 foreach(index, card; cards){
                     if(card.discardable(true)){
@@ -94,12 +94,18 @@ void main(string[] args) {
                 }
             }
         }
-        auto complement = discards.combinations!false(deck.length - cards.length);
-        complement.each!(c => writeln(cards ~ c));
-
-        writeln("Discards: ", discards.length, " : ", discards);
-        writeln("Cards: ", cards.length, " : ", cards);
-        writeln("Deck: ", deck.length, " : ", deck);
-        writeln("Combinations: ", complement.length);
+        auto complement = discards.combinations(deck.length - cards.length);
+        foreach(c ; complement){
+            auto game = cards ~ c;
+            assert(game.length == deck.length);
+            auto turns = iota(0, decks.length).permutations;
+            foreach(turn; turns){
+                writeln(turn);
+                foreach(index; turn)
+                {
+                    writeln("Playing ", index);
+                }
+            }
+        }
     }
 }

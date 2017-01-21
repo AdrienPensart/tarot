@@ -1,5 +1,6 @@
 module card;
 
+import std.stdio;
 import std.conv;
 
 enum TOTAL_CARDS = 78;
@@ -33,8 +34,7 @@ static this(){
     mapping =  [Color.Pique:r"♠", Color.Carreau:r"♦", Color.Trefle:r"♣", Color.Coeur:r"♥"];
 }
 
-struct Card
-{
+struct Card{
     this(Color c, ubyte v){
         this.c = c;
         this.v = v;
@@ -56,10 +56,12 @@ struct Card
 
     invariant{
         assert(c == Color.Pique || c == Color.Carreau || c == Color.Coeur || c == Color.Trefle || c == Color.Atout);
-        if(c == Color.Atout){
-            assert(v >= 0 && v <= 21);
+        static if(c == Color.Atout){
+            assert(v >= 0);
+            assert(v <= 21);
         } else {
-            assert(v >= 0 && v <= 14);
+            assert(v > 0);
+            assert(v <= 14);
         }
     }
 
@@ -114,4 +116,6 @@ unittest{
     assert(Excuse.discardable == false);
     assert(Petit.discardable == false);
     assert(_21.discardable == false);
+
+    auto c = new Card(Color.Coeur, 0);
 }

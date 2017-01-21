@@ -1,6 +1,10 @@
 {
 	"fileVersion": 1,
 	"versions": {
-		"docopt": "0.6.1-b.6"
+		"derelict-pq": "2.0.2",
+		"derelict-util": "2.1.0",
+		"docopt": "0.6.1-b.6",
+		"dpq2": "0.6.20",
+		"vibe-d": "0.7.30"
 	}
 }

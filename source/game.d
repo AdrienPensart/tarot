@@ -17,7 +17,7 @@ unittest {
     }
 
     Deck misere = [Card(Color.Carreau, 1), Card(Color.Pique, 14), Card(Color.Coeur, 10)];
-    Deck atouts = [_1, _2];
+    Deck atouts = [_1, _2, _3];
     Deck petit = [Petit];
     Deck excuse = [Excuse];
 

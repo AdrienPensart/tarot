@@ -12,7 +12,13 @@ auto show(const Deck deck){
     return deck;
 }
 
-auto points(Deck deck){
+Deck give(ref Deck stack, size_t n){
+    auto s = stack[0..n];
+    stack = stack[n..$];
+    return s;
+}
+
+auto points(ref Deck deck) {
     float p = 0.0;
     foreach(d; deck)
     {
