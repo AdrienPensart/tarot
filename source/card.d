@@ -50,7 +50,18 @@ struct Card{
             }
             return to!wstring(v) ~ r"🂠";
         } else {
-            return to!wstring(v) ~ mapping[c];
+            switch(v){
+                case 11:
+                    return "V" ~ mapping[c];
+                case 12:
+                        return "C" ~ mapping[c];
+                case 13:
+                        return "D" ~ mapping[c];
+                case 14:
+                        return "R" ~ mapping[c];
+                default:
+                    return to!wstring(v) ~ mapping[c];
+            }
         }
     }
 

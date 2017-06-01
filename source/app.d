@@ -4,7 +4,6 @@ import combinations: combinations;
 import std.algorithm;
 import std.array;
 import std.range;
-import std.random;
 import std.stdio;
 import std.conv;
 import docopt;
@@ -21,49 +20,21 @@ void main(string[] args) {
 
     Usage:
       tarot --version
-      tarot [--players=<n>]
+      tarot [--players=<n>] [--max-gen=<n>] [--max-order=<n>] [--max-discard=<n>]
 
     Options:
-      --players=<n>  Number of players in simulation (between 3 and 5) [default: 4]
-      -h --help      Show this screen.
-      --version      Show version.
+      --players=<n>      Number of players in simulation (between 3 and 5) [default: 4]
+      --max-gen=<n>      Max number of generations to create [default: 1]
+      --max-order=<n>    Max number of playing order to create from each discard [default: 1]
+      --max-discard=<n>  Max number of discards combinations to create from each generation [default: 1]
+      -h --help          Show this screen.
+      --version          Show version.
     ";
     auto arguments = docopt.docopt(doc, args[1..$], true, "Tarot simulation 1.0");
-    //writeln(to!int(arguments["--players"].asInt));
     auto players = to!int(arguments["--players"].toString);
+	Distribution d = distribution(players);
 
-    auto stack = newStack();
-    //assert(stack.length == TOTAL_CARDS);
 
-    randomShuffle(stack);
-
-    enum MIN_PLAYER = 3;
-    enum MAX_PLAYER = 5;
-    if(players < MIN_PLAYER || players > MAX_PLAYER){
-            writeln("Bad number of players : ",players);
-            return;
-    }
-
-    // 78 - 3 = 75, 75 - 45 = 30
-    auto decks = new Deck[players];
-    enum MIN_CARD = 15;
-    enum CARD_PER_TURN = 3;
-    Deck dog = stack.give(CARD_PER_TURN);
-    foreach(p; 0..players){
-        decks[p] ~= stack.give(MIN_CARD);
-    }
-    while(((cast(int)stack.length - CARD_PER_TURN) / players) > CARD_PER_TURN - 1){
-        foreach(p; 0..players){
-            decks[p] ~= stack.give(CARD_PER_TURN);
-        }
-    }
-    dog ~= stack.give(stack.length);
-    foreach(i, deck; decks){
-        if(deck.petitSec){
-            writeln("Can't continue with petit sec in deck");
-            return;
-        }
-    }
     /* For each :
         - random generation (1 for the moment)
         - playing mode (3, 4, 5) (1 for the moment)
@@ -72,12 +43,13 @@ void main(string[] args) {
         - order of playing (decks index permutations)
         - combinations of deck play following game rules
     */
-    foreach(deck; decks){
+    writeln("Number of decks: ", d.decks.length);
+    foreach(deck; d.decks){
         Deck cards;
-        Deck discards;
-        foreach(card; deck ~ dog){
+        Deck discardables;
+        foreach(card; deck ~ d.dog){
             if(card.discardable()){
-                discards ~= card;
+                discardables ~= card;
             } else {
                 cards ~= card;
             }
@@ -87,25 +59,38 @@ void main(string[] args) {
             while(cards.length > deck.length){
                 foreach(index, card; cards){
                     if(card.discardable(true)){
-                        discards ~= card;
+                        discardables ~= card;
                         cards = cards[0..index] ~ cards[index+1..cards.length];
                         break;
                     }
                 }
             }
         }
-        auto complement = discards.combinations(deck.length - cards.length);
-        foreach(c ; complement){
-            auto game = cards ~ c;
+        writeln("  Discardables: ", discardables);
+        writeln("  Discardables value: ", discardables.points);
+        auto discards = discardables.combinations(deck.length - cards.length);
+        writeln("  Deck length: ", deck.length, " and cards length: ", cards.length);
+        writeln("  Discard: ", discards.length);
+        foreach(complement ; discards){
+            auto discardPoints = discardables.points - complement.points;
+            writeln("    Discard value: ", discardPoints);
+            auto game = cards ~ complement;
             assert(game.length == deck.length);
-            auto turns = iota(0, decks.length).permutations;
+            auto turns = iota(0, d.decks.length).permutations;
+            writeln("    Complement: ", complement);
+            writeln("    Game: ", game);
+            writeln("    Game size: ", game.length);
+            writeln("    Permutations of turns: ", array(turns).length);
             foreach(turn; turns){
                 writeln(turn);
                 foreach(index; turn)
                 {
                     writeln("Playing ", index);
                 }
+                break;
             }
+            break;
         }
+        break;
     }
 }

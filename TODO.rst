@@ -1,0 +1,1 @@
+- colors for symbols red / black

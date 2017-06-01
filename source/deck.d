@@ -5,6 +5,8 @@ import card;
 
 alias Card[] Deck;
 
+
+
 auto show(const Deck deck){
     foreach(d; deck){
         write("[",d,"]");
@@ -28,6 +30,7 @@ auto points(ref Deck deck) {
 }
 
 auto newStack(){
+    import std.random : randomShuffle;
     Deck stack;
     foreach(ubyte v; 0..22){
         stack ~= Card(Color.Atout, v);
@@ -37,6 +40,7 @@ auto newStack(){
             stack ~= Card(c, v);
         }
     }
+    randomShuffle(stack);
     return stack;
 }
 
