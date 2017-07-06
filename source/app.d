@@ -20,7 +20,7 @@ void main(string[] args) {
 
     Usage:
       tarot --version
-      tarot [--players=<n>] [--max-gen=<n>] [--max-order=<n>] [--max-discard=<n>]
+      tarot [options]
 
     Options:
       --players=<n>      Number of players in simulation (between 3 and 5) [default: 4]
@@ -32,7 +32,7 @@ void main(string[] args) {
     ";
     auto arguments = docopt.docopt(doc, args[1..$], true, "Tarot simulation 1.0");
     auto players = to!int(arguments["--players"].toString);
-	Distribution d = distribution(players);
+    Distribution d = distribution(players);
 
 
     /* For each :
